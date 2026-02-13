@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -21,10 +22,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={poppins.className}>
-        <QueryProvider>{children}</QueryProvider>
-        <Toaster />
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${poppins.variable} font-sans`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProvider>{children}</QueryProvider>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
