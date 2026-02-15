@@ -48,8 +48,8 @@ function StatCard({
 
 function StatCardSkeleton() {
   return (
-    <Card className="relative overflow-hidden">
-      <div className="absolute left-0 top-0 h-full w-1 bg-muted" />
+    <Card className="relative p-0 border shadow-none ">
+      <div className="absolute left-4 items-center  h-18 top-6 w-1" />
       <div className="flex items-start justify-between p-6 pl-8">
         <div className="flex flex-col space-y-2">
           <Skeleton className="h-4 w-24" />
