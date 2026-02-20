@@ -65,14 +65,18 @@ export function useCreateTask() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: CreateTaskInput) => createTask(input),
+    mutationFn: createTask,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: taskKeys.stats() });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["task-stats"] });
       toast.success("Task created successfully!");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to create task: ${error.message}`);
+    onError: (error: any) => {
+      if (error.message?.includes("already exists")) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to create task");
+      }
     },
   });
 }
@@ -84,14 +88,18 @@ export function useUpdateTask() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdateTaskInput }) =>
       updateTask(id, input),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: taskKeys.detail(data.id) });
-      queryClient.invalidateQueries({ queryKey: taskKeys.stats() });
-      toast.success("Task updated successfully!");
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["task-stats"] });
+      toast.success("Task updated successfully!"); // ← เพิ่ม success toast
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to update task: ${error.message}`);
+    onError: (error: any) => {
+      // ← Handle error ที่นี่
+      if (error.message?.includes("already exists")) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to update task");
+      }
     },
   });
 }

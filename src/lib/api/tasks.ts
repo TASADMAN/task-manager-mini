@@ -8,9 +8,6 @@ import type {
   SortOrder,
 } from "@/types/task";
 
-// ============================================
-// Get Tasks (แยกตาม user)
-// ============================================
 export async function getTasks(
   filters?: TaskFilters,
   sortBy: SortBy = "created_at",
@@ -18,7 +15,6 @@ export async function getTasks(
 ) {
   const supabase = createClient();
 
-  // ← เพิ่ม: Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -28,7 +24,7 @@ export async function getTasks(
   }
 
   // ← เพิ่ม: Filter by user_id
-  let query = supabase.from("tasks").select("*").eq("user_id", user.id); // ← เพิ่มบรรทัดนี้
+  let query = supabase.from("tasks").select("*").eq("user_id", user.id);
 
   if (filters?.status && filters.status !== "all") {
     query = query.eq("status", filters.status);
@@ -52,13 +48,9 @@ export async function getTasks(
   return data as Task[];
 }
 
-// ============================================
-// Get Task By ID (เช็ค user)
-// ============================================
 export async function getTaskById(id: string) {
   const supabase = createClient();
 
-  // ← เพิ่ม: Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -71,20 +63,16 @@ export async function getTaskById(id: string) {
     .from("tasks")
     .select("*")
     .eq("id", id)
-    .eq("user_id", user.id) // ← เพิ่มบรรทัดนี้
+    .eq("user_id", user.id)
     .single();
 
   if (error) throw error;
   return data as Task;
 }
 
-// ============================================
-// Create Task (ใส่ user_id อัตโนมัติ)
-// ============================================
 export async function createTask(input: CreateTaskInput) {
   const supabase = createClient();
 
-  // ← เพิ่ม: Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -100,22 +88,24 @@ export async function createTask(input: CreateTaskInput) {
       description: input.description || null,
       status: input.status || "todo",
       priority: input.priority || "medium",
-      user_id: user.id, // ← เปลี่ยนเป็น user.id
+      user_id: user.id,
     })
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === "23505") {
+      throw new Error(`Task "${input.title}" already exists`);
+    }
+    throw error;
+  }
+
   return data as Task;
 }
 
-// ============================================
-// Update Task (เช็ค user)
-// ============================================
 export async function updateTask(id: string, input: UpdateTaskInput) {
   const supabase = createClient();
 
-  // ← เพิ่ม: Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -124,7 +114,6 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
     throw new Error("Not authenticated");
   }
 
-  // แปลง empty string เป็น null
   const cleanedInput = {
     ...input,
     description: input.description === "" ? null : input.description,
@@ -135,7 +124,7 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
     .from("tasks")
     .update(cleanedInput)
     .eq("id", id)
-    .eq("user_id", user.id) // ← เพิ่มบรรทัดนี้
+    .eq("user_id", user.id)
     .select()
     .single();
 
@@ -143,13 +132,9 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
   return data as Task;
 }
 
-// ============================================
-// Delete Task (เช็ค user)
-// ============================================
 export async function deleteTask(id: string) {
   const supabase = createClient();
 
-  // ← เพิ่ม: Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -168,20 +153,13 @@ export async function deleteTask(id: string) {
   return { success: true };
 }
 
-// ============================================
-// Update Task Status
-// ============================================
 export async function updateTaskStatus(id: string, status: Task["status"]) {
   return updateTask(id, { status });
 }
 
-// ============================================
-// Get Task Stats (แยกตาม user)
-// ============================================
 export async function getTaskStats() {
   const supabase = createClient();
 
-  // ← เพิ่ม: Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -193,7 +171,7 @@ export async function getTaskStats() {
   const { data, error } = await supabase
     .from("tasks")
     .select("status")
-    .eq("user_id", user.id); // ← เพิ่มบรรทัดนี้
+    .eq("user_id", user.id);
 
   if (error) throw error;
 

@@ -64,20 +64,20 @@ const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
 ];
 
 const DEFAULT_FOOTER_NAVIGATION: FooterNavigation = {
-  Features: [
-    { label: "API", href: "#" },
-    { label: "Pricing", href: "#" },
-    { label: "Docs", href: "#" },
+  Product: [
+    { label: "Task Levels", href: "#" },
+    { label: "Smart Scheduling", href: "#" },
+    { label: "Progress Insights", href: "#" },
   ],
-  Support: [
-    { label: "Account", href: "#" },
-    { label: "FAQ", href: "#" },
-    { label: "Contact", href: "#" },
+  Resources: [
+    { label: "Productivity Blog", href: "#" },
+    { label: "Help Center", href: "#" },
+    { label: "API Reference", href: "#" },
   ],
-  Legal: [
-    { label: "Privacy", href: "#" },
+  Company: [
+    { label: "About Us", href: "#" },
+    { label: "Privacy Policy", href: "#" },
     { label: "Terms of Service", href: "#" },
-    { label: "Cookies", href: "#" },
   ],
 };
 
@@ -233,7 +233,7 @@ function RightSection({
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-8 sm:gap-12 lg:gap-20 lg:justify-end">
         {Object.entries(footerNavigation).map(([title, links]) => (
           <div key={title} className="min-w-0">
-            <div className="mb-4 font-semibold text-sm text-gray-900">
+            <div className="mb-4 font-semibold text-sm text-primary">
               {title}
             </div>
             <ul className="space-y-3 text-muted-foreground">
@@ -269,7 +269,7 @@ export default function Footer2({
     text: websiteNameText = (
       <h3 className="flex items-center gap-2">
         <FaBolt size={20} />
-        <span className="font-bold text-2xl">BoltStack.dev</span>
+        <span className="font-bold text-2xl">Devsadman.dev</span>
       </h3>
     ),
     className: websiteNameClassName = "",
@@ -284,11 +284,11 @@ export default function Footer2({
   const {
     className: newsLetterCardClassName = "",
     title: {
-      text: newsLetterTitleText = "Subscribe to our newsletter",
+      text: newsLetterTitleText = "Master your productivity",
       className: newsLetterTitleClassName = "",
     } = {},
     description: {
-      text: newsLetterDescriptionText = "Be the first to receive updates, tips, and more.",
+      text: newsLetterDescriptionText = "Get weekly tips on how to manage high-difficulty tasks and boost your 'Done' rate.",
       className: newsLetterDescriptionClassName = "",
     } = {},
     placeholder = "Enter your email...",

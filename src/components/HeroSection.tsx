@@ -82,7 +82,7 @@ const HeroSection6: React.FC<HeroSectionProps> = ({
   const {
     alt: imageAlt = "Product Dashboard Preview",
     className: imageClassName = "",
-    src: srcImage,
+    src: srcImage = "/image/Manager.png",
   } = imagePlaceholder || {};
 
   return (
