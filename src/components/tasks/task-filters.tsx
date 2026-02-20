@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search, Filter, X } from "lucide-react";
+import { Search, Filter, X, Circle, Clock, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -23,6 +23,60 @@ interface TaskFiltersProps {
   onPriorityChange: (value: TaskPriority | "all") => void;
 }
 
+const STATUS_OPTIONS: Array<{
+  value: TaskStatus | "all";
+  label: string;
+  icon: React.ReactNode;
+}> = [
+  {
+    value: "all",
+    label: "All Status",
+    icon: <Filter className="h-4 w-4 text-muted-foreground" />,
+  },
+  {
+    value: "todo",
+    label: "To Do",
+    icon: <Circle className="h-4 w-4 text-gray-500" />,
+  },
+  {
+    value: "in-progress",
+    label: "In Progress",
+    icon: <Clock className="h-4 w-4 text-orange-500" />,
+  },
+  {
+    value: "done",
+    label: "Done",
+    icon: <CheckCircle2 className="h-4 w-4 text-green-500" />,
+  },
+];
+
+const PRIORITY_OPTIONS: Array<{
+  value: TaskPriority | "all";
+  label: string;
+  icon: React.ReactNode;
+}> = [
+  {
+    value: "all",
+    label: "All Priorities",
+    icon: <Filter className="h-4 w-4 text-muted-foreground" />,
+  },
+  {
+    value: "low",
+    label: "Low",
+    icon: <span className="text-green-500">✦</span>,
+  },
+  {
+    value: "medium",
+    label: "Medium",
+    icon: <span className="text-yellow-500">✦</span>,
+  },
+  {
+    value: "high",
+    label: "High",
+    icon: <span className="text-red-500">✦</span>,
+  },
+];
+
 export function TaskFilters({
   searchQuery,
   onSearchChange,
@@ -38,41 +92,31 @@ export function TaskFilters({
     onPriorityChange("all");
   };
 
-  // แก้ไขตรงนี้
-  const getStatusLabel = (status: TaskStatus | "all"): string => {
-    const labels: Record<TaskStatus | "all", string> = {
-      all: "All Status",
-      todo: "To Do",
-      "in-progress": "In Progress",
-      done: "Done",
-    };
-    return labels[status];
+  // Helper functions
+  const getStatusOption = (status: TaskStatus | "all") => {
+    return STATUS_OPTIONS.find((opt) => opt.value === status);
   };
 
-  const getPriorityLabel = (priority: TaskPriority | "all"): string => {
-    const labels: Record<TaskPriority | "all", string> = {
-      all: "All Priorities",
-      low: "Low",
-      medium: "Medium",
-      high: "High",
-    };
-    return labels[priority];
+  const getPriorityOption = (priority: TaskPriority | "all") => {
+    return PRIORITY_OPTIONS.find((opt) => opt.value === priority);
   };
 
   const getStatusColor = (status: TaskStatus): string => {
     const colors: Record<TaskStatus, string> = {
-      todo: "bg-gray-100 text-gray-700 hover:bg-gray-200",
-      "in-progress": "bg-orange-100 text-orange-700 hover:bg-orange-200",
-      done: "bg-green-100 text-green-700 hover:bg-green-200",
+      todo: "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300",
+      "in-progress":
+        "bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400",
+      done: "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400",
     };
     return colors[status];
   };
 
   const getPriorityColor = (priority: TaskPriority): string => {
     const colors: Record<TaskPriority, string> = {
-      low: "bg-blue-100 text-blue-700 hover:bg-blue-200",
-      medium: "bg-yellow-100 text-yellow-700 hover:bg-yellow-200",
-      high: "bg-red-100 text-red-700 hover:bg-red-200",
+      low: "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400",
+      medium:
+        "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400",
+      high: "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400",
     };
     return colors[priority];
   };
@@ -81,40 +125,52 @@ export function TaskFilters({
     <div className="space-y-4">
       {/* Search & Filter Controls */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 max-w-2xl">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        {/* Search Input */}
+        <div className="relative max-w-2xl flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search tasks..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 h-12 border-2 shadow-none"
+            className="h-12 w-full border-gray-200 pl-10 shadow-none dark:border-gray-800"
           />
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Filter Selects */}
+        <div className="flex items-center justify-end gap-4">
+          {/* Priority Filter */}
           <Select value={priorityFilter} onValueChange={onPriorityChange}>
-            <SelectTrigger className="border-gray-200 shadow-none">
-              <Filter className="mr-2 h-4 w-4" />
+            <SelectTrigger className="border-gray-200 shadow-none dark:border-gray-800">
+              {/* {getPriorityOption(priorityFilter)?.icon} */}
               <SelectValue placeholder="By Priority" />
             </SelectTrigger>
             <SelectContent align="start" position="popper">
-              <SelectItem value="all">All Priorities</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
+              {PRIORITY_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  <div className="flex items-center gap-2">
+                    {option.icon}
+                    <span>{option.label}</span>
+                  </div>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
+          {/* Status Filter */}
           <Select value={statusFilter} onValueChange={onStatusChange}>
-            <SelectTrigger className="border-gray-200 shadow-none">
-              <Filter className="mr-2 h-4 w-4" />
+            <SelectTrigger className="border-gray-200 shadow-none dark:border-gray-800">
+              {/* {getStatusOption(statusFilter)?.icon} */}
               <SelectValue placeholder="By Status" />
             </SelectTrigger>
             <SelectContent align="start" position="popper">
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="todo">To Do</SelectItem>
-              <SelectItem value="in-progress">In Progress</SelectItem>
-              <SelectItem value="done">Done</SelectItem>
+              {STATUS_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  <div className="flex items-center gap-2">
+                    {option.icon}
+                    <span>{option.label}</span>
+                  </div>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -122,15 +178,15 @@ export function TaskFilters({
 
       {/* Active Filter Badges */}
       {hasActiveFilters && (
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-wrap items-center gap-2">
           {statusFilter !== "all" && (
             <Badge
               variant="secondary"
               className={`gap-1 pr-1 ${getStatusColor(statusFilter)}`}
             >
-              <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-current" />
-                {getStatusLabel(statusFilter)}
+              <span className="flex items-center gap-1.5">
+                {getStatusOption(statusFilter)?.icon}
+                {getStatusOption(statusFilter)?.label}
               </span>
               <Button
                 variant="ghost"
@@ -148,8 +204,9 @@ export function TaskFilters({
               variant="secondary"
               className={`gap-1 pr-1 ${getPriorityColor(priorityFilter)}`}
             >
-              <span className="flex items-center gap-1">
-                ✦ {getPriorityLabel(priorityFilter)}
+              <span className="flex items-center gap-1.5">
+                {getPriorityOption(priorityFilter)?.icon}
+                {getPriorityOption(priorityFilter)?.label}
               </span>
               <Button
                 variant="ghost"

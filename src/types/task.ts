@@ -1,5 +1,8 @@
-export type TaskStatus = "todo" | "in-progress" | "done";
-export type TaskPriority = "low" | "medium" | "high";
+export const TASK_STATUSES = ["todo", "in-progress", "done"] as const;
+export const TASK_PRIORITIES = ["low", "medium", "high"] as const;
+
+export type TaskStatus = (typeof TASK_STATUSES)[number];
+export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
 export interface Task {
   id: string;
@@ -17,7 +20,6 @@ export interface CreateTaskInput {
   description?: string;
   status?: TaskStatus;
   priority?: TaskPriority;
-  user_id?: string | null;
 }
 
 export interface UpdateTaskInput {
@@ -40,8 +42,6 @@ export type SortBy =
   | "status"
   | "title";
 export type SortOrder = "asc" | "desc";
-
-export type TasksResponse = Task[];
 
 export const STATUS_CONFIG = {
   todo: {
@@ -67,7 +67,8 @@ export const PRIORITY_CONFIG = {
   low: {
     label: "Low",
     variant: "outline" as const,
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400",
+    color:
+      "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400",
   },
   medium: {
     label: "Medium",

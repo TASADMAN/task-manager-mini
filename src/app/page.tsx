@@ -1,17 +1,27 @@
 "use client";
+
+import * as React from "react";
 import { Header } from "@/components/layout/header";
-import { StatsCards } from "@/components/layout/stats-card";
 import { TaskFilters } from "@/components/tasks/task-filters";
 import { TaskList } from "@/components/tasks/task-list";
+import { TaskFormDialog } from "@/components/tasks/task-form-dialog";
+import { DeleteTaskDialog } from "@/components/tasks/delete-task-dialog";
+import { StatsCards } from "@/components/layout/stats-card";
+
+import { toast } from "sonner";
+import type {
+  TaskStatus,
+  TaskPriority,
+  Task,
+  CreateTaskInput,
+} from "@/types/task";
 import {
+  useCreateTask,
   useDeleteTask,
   useTasks,
+  useUpdateTask,
   useUpdateTaskStatus,
 } from "@/hooks/use-tasks";
-
-import { Task, TaskPriority, TaskStatus } from "@/types/task";
-import React from "react";
-import { toast } from "sonner";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -22,7 +32,12 @@ export default function Home() {
     TaskPriority | "all"
   >("all");
 
-  // Fetch tasks with filters
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [editingTask, setEditingTask] = React.useState<Task | undefined>();
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  const [deletingTask, setDeletingTask] = React.useState<Task | null>(null);
+
   const { data: tasks, isLoading } = useTasks(
     {
       search: searchQuery,
@@ -33,22 +48,61 @@ export default function Home() {
     "desc",
   );
 
+  const createMutation = useCreateTask();
+  const updateMutation = useUpdateTask();
   const updateStatusMutation = useUpdateTaskStatus();
   const deleteMutation = useDeleteTask();
+
+  const handleAddTask = () => {
+    setEditingTask(undefined);
+    setIsDialogOpen(true);
+  };
+
+  const handleEdit = (task: Task) => {
+    setEditingTask(task);
+    setIsDialogOpen(true);
+  };
+
+  const handleSubmit = (data: CreateTaskInput) => {
+    if (editingTask) {
+      updateMutation.mutate(
+        { id: editingTask.id, input: data },
+        {
+          onSuccess: () => {
+            setIsDialogOpen(false);
+            setEditingTask(undefined);
+          },
+        },
+      );
+    } else {
+      createMutation.mutate(data, {
+        onSuccess: () => {
+          setIsDialogOpen(false);
+        },
+      });
+    }
+  };
 
   const handleStatusToggle = (taskId: string, newStatus: Task["status"]) => {
     updateStatusMutation.mutate({ id: taskId, status: newStatus });
   };
 
-  const handleEdit = (task: Task) => {
-    // TODO: Open edit dialog
-    console.log("Edit task:", task);
+  const handleDelete = (taskId: string) => {
+    const task = tasks?.find((t) => t.id === taskId);
+    if (task) {
+      setDeletingTask(task);
+      setIsDeleteDialogOpen(true);
+    }
   };
 
-  const handleDelete = (taskId: string) => {
-    // TODO: Show confirmation dialog
-    if (confirm("Are you sure you want to delete this task?")) {
-      deleteMutation.mutate(taskId);
+  const handleConfirmDelete = () => {
+    if (deletingTask) {
+      deleteMutation.mutate(deletingTask.id, {
+        onSuccess: () => {
+          setIsDeleteDialogOpen(false);
+          setDeletingTask(null);
+        },
+      });
     }
   };
 
@@ -57,15 +111,67 @@ export default function Home() {
     toast.success("Task title copied to clipboard!");
   };
 
+  const handleMarkAllCompleted = async () => {
+    if (!tasks || tasks.length === 0) return;
+
+    try {
+      await Promise.all(
+        tasks.map((task) =>
+          updateStatusMutation.mutateAsync({ id: task.id, status: "done" }),
+        ),
+      );
+      toast.success(`${tasks.length} tasks marked as completed!`);
+    } catch (error) {
+      toast.error("Failed to update tasks");
+    }
+  };
+
+  const handleMarkAllInProgress = async () => {
+    if (!tasks || tasks.length === 0) return;
+
+    try {
+      await Promise.all(
+        tasks.map((task) =>
+          updateStatusMutation.mutateAsync({
+            id: task.id,
+            status: "in-progress",
+          }),
+        ),
+      );
+      toast.success(`${tasks.length} tasks marked as in progress!`);
+    } catch (error) {
+      toast.error("Failed to update tasks");
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (!tasks || tasks.length === 0) return;
+
+    try {
+      await Promise.all(
+        tasks.map((task) => deleteMutation.mutateAsync(task.id)),
+      );
+      toast.success(`${tasks.length} tasks deleted!`);
+    } catch (error) {
+      toast.error("Failed to delete tasks");
+    }
+  };
+
   return (
     <div className="max-h-screen bg-background">
       <div className="mt-6">
-        <Header />
+        <Header
+          onAddTask={handleAddTask}
+          onMarkAllCompleted={handleMarkAllCompleted}
+          onMarkAllInProgress={handleMarkAllInProgress}
+          onDeleteAll={handleDeleteAll}
+          taskCount={tasks?.length || 0}
+          isLoading={updateStatusMutation.isPending || deleteMutation.isPending}
+        />
       </div>
-      <main className=" mx-16  px-4 py-6 md:px-8 mt-18">
+      <div className="m-auto mt-18 px-4 md:px-16">
         <StatsCards />
 
-        {/* Search & Filters */}
         <div className="mt-18">
           <TaskFilters
             searchQuery={searchQuery}
@@ -77,15 +183,31 @@ export default function Home() {
           />
         </div>
 
-        <TaskList
-          tasks={tasks || []}
-          isLoading={isLoading}
-          onStatusToggle={handleStatusToggle}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onCopy={handleCopy}
-        />
-      </main>
+        <div className="mt-8">
+          <TaskList
+            tasks={tasks || []}
+            isLoading={isLoading}
+            onStatusToggle={handleStatusToggle}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onCopy={handleCopy}
+          />
+        </div>
+      </div>
+      <TaskFormDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        task={editingTask}
+        onSubmit={handleSubmit}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+      />
+      <DeleteTaskDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        task={deletingTask}
+        onConfirm={handleConfirmDelete}
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   );
 }

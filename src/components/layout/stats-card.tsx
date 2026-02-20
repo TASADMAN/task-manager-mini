@@ -1,10 +1,10 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { ClipboardList, CheckCircle2, Clock, TrendingUp } from "lucide-react";
-
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTaskStats } from "@/hooks/use-tasks";
+import { FaCheckCircle, FaTasks, FaChartPie } from "react-icons/fa";
+import { TbProgress } from "react-icons/tb";
 
 interface StatCardProps {
   title: string;
@@ -22,16 +22,14 @@ function StatCard({
   borderColor,
 }: StatCardProps) {
   return (
-    <Card className="relative p-0 border shadow-none ">
+    <Card className="relative border p-0 shadow-none">
       {/* Border Left */}
-      <div
-        className={`absolute left-4 items-center  h-18 top-6 w-1 ${borderColor}`}
-      />
+      <div className={`absolute left-4 top-6 h-18 w-1 ${borderColor}`} />
 
       <div className="flex items-start justify-between p-6 pl-8">
         {/* Content */}
         <div className="flex flex-col">
-          <p className="text-base font-light text-gray-500">{title}</p>
+          <p className="text-base font-light text-muted-foreground">{title}</p>
           <h3 className="mt-2 text-4xl font-bold">{value}</h3>
         </div>
 
@@ -48,13 +46,20 @@ function StatCard({
 
 function StatCardSkeleton() {
   return (
-    <Card className="relative p-0 border shadow-none ">
-      <div className="absolute left-4 items-center  h-18 top-6 w-1" />
+    <Card className="relative border p-0 shadow-none">
+      {/* Border Left - Animated */}
+      <Skeleton className="absolute left-4 top-6 h-16 w-1" />
+
       <div className="flex items-start justify-between p-6 pl-8">
-        <div className="flex flex-col space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-10 w-16" />
+        {/* Content */}
+        <div className="flex flex-col space-y-3">
+          {/* Title */}
+          <Skeleton className="h-4 w-28" />
+          {/* Value */}
+          <Skeleton className="h-10 w-20" />
         </div>
+
+        {/* Icon */}
         <Skeleton className="h-10 w-10 rounded-md" />
       </div>
     </Card>
@@ -80,23 +85,12 @@ export function StatsCards() {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Total Tasks */}
       <StatCard
         title="Total Tasks"
         value={stats?.total || 0}
-        icon={
-          <ClipboardList className="h-5 w-5 text-green-600 dark:text-green-400" />
-        }
-        iconBgColor="bg-green-100 dark:bg-green-900/20"
-        borderColor="bg-primary"
-      />
-
-      <StatCard
-        title="Completed"
-        value={stats?.done || 0}
-        icon={
-          <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-        }
-        iconBgColor="bg-green-100 dark:bg-green-900/20"
+        icon={<FaTasks className="h-5 w-5 text-primary dark:text-primary" />}
+        iconBgColor="bg-primary/10"
         borderColor="bg-primary"
       />
 
@@ -104,18 +98,28 @@ export function StatsCards() {
       <StatCard
         title="In Progress"
         value={stats?.["in-progress"] || 0}
-        icon={<Clock className="h-5 w-5 text-green-600 dark:text-green-400" />}
-        iconBgColor="bg-green-100 dark:bg-green-900/20"
+        icon={<TbProgress className="h-5 w-5 text-primary dark:text-primary" />}
+        iconBgColor="bg-primary/10"
         borderColor="bg-primary"
       />
 
+      {/* Completed */}
+      <StatCard
+        title="Completed"
+        value={stats?.done || 0}
+        icon={
+          <FaCheckCircle className="h-5 w-5 text-primary dark:text-primary" />
+        }
+        iconBgColor="bg-primary/10"
+        borderColor="bg-primary"
+      />
+
+      {/* Completion Rate */}
       <StatCard
         title="Completion Rate"
         value={`${completionRate}%`}
-        icon={
-          <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
-        }
-        iconBgColor="bg-green-100 dark:bg-green-900/20"
+        icon={<FaChartPie className="h-5 w-5 text-primary dark:text-primary" />}
+        iconBgColor="bg-primary/10"
         borderColor="bg-primary"
       />
     </div>

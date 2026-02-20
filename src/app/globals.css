@@ -179,6 +179,15 @@
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+  --animate-ripple: ripple var(--duration,2s) ease calc(var(--i, 0)*.2s) infinite;
+  @keyframes ripple {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    }
+  50% {
+    transform: translate(-50%, -50%) scale(0.9);
+    }
+  }
 }
 
 body {
@@ -194,8 +203,82 @@ body {
   }
 }
 
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+[role="menuitem"],
+[role="option"],
+[role="tab"],
+[role="switch"],
+[role="checkbox"],
+input[type="submit"]:not(:disabled),
+input[type="button"]:not(:disabled),
+input[type="reset"]:not(:disabled),
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="file"]:not(:disabled),
+select:not(:disabled),
+a:not([aria-disabled="true"]),
+label[for]:not([aria-disabled="true"]),
+summary,
+[data-clickable="true"],
+[data-state="open"],
+[data-state="closed"] {
+  @apply cursor-pointer;
+}
+
+/* Disabled elements - Not Allowed */
+button:disabled,
+button[disabled],
+button[aria-disabled="true"],
+input:disabled,
+select:disabled,
+textarea:disabled,
+[disabled],
+[aria-disabled="true"],
+.disabled {
+  @apply cursor-not-allowed opacity-50;
+}
+
+/* Text inputs - Text cursor */
+input[type="text"]:not(:disabled),
+input[type="email"]:not(:disabled),
+input[type="password"]:not(:disabled),
+input[type="search"]:not(:disabled),
+input[type="tel"]:not(:disabled),
+input[type="url"]:not(:disabled),
+input[type="number"]:not(:disabled),
+textarea:not(:disabled),
+[contenteditable="true"] {
+  @apply cursor-text;
+}
+
+[title],
+[data-tooltip] {
+  @apply cursor-help;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-3000 {
+  animation-delay: 3s;
 }
