@@ -85,7 +85,7 @@ export function TaskItem({
         <Checkbox
           checked={isCompleted}
           onCheckedChange={handleCheckboxChange}
-          className="h-4 w-4 shrink-0 sm:h-5 sm:w-5"
+          className="h-6 w-6 shrink-0 rounded-full sm:h-8 sm:w-8 shadow-none border-gray-400"
         />
 
         <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
